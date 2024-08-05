@@ -82,9 +82,16 @@ async function checkForNewEntries() {
 
 
 checkForNewEntries();
-sendTelegramMessage("BirdWatcher is online and watching 👀");
+// sendTelegramMessage("BirdWatcher is online and watching 👀");
 
 // Create cron job for checking birds every 10 minutes.
 cron.schedule('*/10 * * * *', () => {
 	checkForNewEntries();
+});
+
+// Listen to port for heroku to not crash
+const PORT = process.env.PORT || 3000;
+const app = require('express')();
+app.listen(PORT, () => {
+	console.log(`Server is running on port ${PORT}`);
 });
