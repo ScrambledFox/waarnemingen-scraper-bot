@@ -88,7 +88,7 @@ async function checkForNewEntries() {
 
 
 checkForNewEntries();
-sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀`);
+// sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀`);
 
 // Create cron job for checking birds every 10 minutes.
 cron.schedule('*/10 * * * *', () => {
