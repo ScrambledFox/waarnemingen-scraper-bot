@@ -53,6 +53,7 @@ function sendBirdSightingToTelegram(birdSighting) {
 }
 
 async function checkForNewEntries() {
+	console.log('Checking for new bird sightings...');
 	await scrapeWebsite();
 
 	// Check if there are new bird sightings
@@ -66,6 +67,7 @@ async function checkForNewEntries() {
 
 	// If there are new bird sightings, send a message
 	if (newBirdSightings.length > 0) {
+		console.log("New birds have been found. Sending messages...");
 		newBirdSightings.forEach((birdSighting) => {
 			sendBirdSightingToTelegram(birdSighting);
 			console.log(prepareMessage(birdSighting));
