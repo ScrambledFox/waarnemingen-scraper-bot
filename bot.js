@@ -42,12 +42,17 @@ function prepareMessage(birdSighting) {
 	return `New ${birdSighting.rarity} bird sighting: ${birdSighting.number} of birds of species ${birdSighting.species} at ${birdSighting.location} on ${birdSighting.datetime}. More info: ${birdSighting.url}`;
 }
 
-function sendTelegramMessage(birdSighting) {
+function sendTelegramMessage(text) {
+	const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
+	const chatId = process.env.TELEGRAM_CHAT_ID;
+	bot.sendMessage(chatId, text);
+}
+
+function sendBirdSightingToTelegram(birdSighting) {
 	const message = prepareMessage(birdSighting);
 	const chatId = process.env.TELEGRAM_CHAT_ID;
 
-	const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
-	bot.sendMessage(chatId, message);
+	sendTelegramMessage(message);
 }
 
 async function checkForNewEntries() {
@@ -59,14 +64,14 @@ async function checkForNewEntries() {
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		sendTelegramMessage(currentBirdSightings[currentBirdSightings.length - 1]);
+		sendCustomTelegramMessage("BirdWatcher is online and watching 👀");
 		return;
 	}
 
 	// If there are new bird sightings, send a message
 	if (newBirdSightings.length > 0) {
 		newBirdSightings.forEach((birdSighting) => {
-			sendTelegramMessage(birdSighting);
+			sendBirdSightingToTelegram(birdSighting);
 			console.log(prepareMessage(birdSighting));
 		});
 	}
