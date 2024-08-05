@@ -35,7 +35,6 @@ async function scrapeWebsite() {
 		// Add the new bird sighting to the currentBirdSightings array
 		currentBirdSightings.push(birdSighting);
 	});
-
 }
 
 function prepareMessage(birdSighting) {
@@ -50,8 +49,6 @@ function sendTelegramMessage(text) {
 
 function sendBirdSightingToTelegram(birdSighting) {
 	const message = prepareMessage(birdSighting);
-	const chatId = process.env.TELEGRAM_CHAT_ID;
-
 	sendTelegramMessage(message);
 }
 
@@ -64,7 +61,6 @@ async function checkForNewEntries() {
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		sendTelegramMessage("BirdWatcher is online and watching 👀");
 		return;
 	}
 
@@ -81,7 +77,12 @@ async function checkForNewEntries() {
 	currentBirdSightings = [];
 }
 
+
+// BIRD WATCHER
+
+
 checkForNewEntries();
+sendTelegramMessage("BirdWatcher is online and watching 👀");
 
 // Create cron job for checking birds every 10 minutes.
 cron.schedule('*/10 * * * *', () => {
