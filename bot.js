@@ -39,7 +39,7 @@ async function scrapeWebsite() {
 }
 
 function prepareMessage(birdSighting) {
-	return `New ${birdSighting.rarity} bird sighting: ${birdSighting.number} of birds of species ${birdSighting.species} at ${birdSighting.location} on ${birdSighting.datetime}. More info: ${birdSighting.url}`;
+	return `New ${birdSighting.rarity.trim()} sighting: ${birdSighting.number.trim()} of species ${birdSighting.species.trim()} at ${birdSighting.location.trim()} on ${birdSighting.datetime.trim()}. More info: ${birdSighting.url}`;
 }
 
 function sendTelegramMessage(text) {
@@ -64,7 +64,7 @@ async function checkForNewEntries() {
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		sendCustomTelegramMessage("BirdWatcher is online and watching 👀");
+		sendTelegramMessage("BirdWatcher is online and watching 👀");
 		return;
 	}
 
@@ -81,7 +81,9 @@ async function checkForNewEntries() {
 	currentBirdSightings = [];
 }
 
-// Create cron job for checking birds every 30 minutes.
+checkForNewEntries();
+
+// Create cron job for checking birds every 10 minutes.
 cron.schedule('*/10 * * * *', () => {
 	checkForNewEntries();
 });
