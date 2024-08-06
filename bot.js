@@ -50,7 +50,7 @@ function sendTelegramMessage(text) {
 	const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
 	const chatId = process.env.TELEGRAM_CHAT_ID;
 	console.log(text);
-	// bot.sendMessage(chatId, text);
+	bot.sendMessage(chatId, text);
 }
 
 function sendBirdSightingToTelegram(birdSighting) {
