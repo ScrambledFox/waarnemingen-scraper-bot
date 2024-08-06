@@ -11,7 +11,6 @@ const cron = require('node-cron');
 
 var BirdSighting = require('./birdSighting.js');
 
-let currentBirdSightings = [];
 let previousBirdSightings = [];
 
 async function scrapeWebsite() {
@@ -24,6 +23,7 @@ async function scrapeWebsite() {
 	const rows = table.find('tr');
 
 	// Iterate over the rows
+	let currentBirdSightings = [];
 	rows.each((index, element) => {
 		const datetime = $(element).find('td:nth-child(1)').text();
 		const species = $(element).find('td:nth-child(2)').text();
@@ -38,6 +38,8 @@ async function scrapeWebsite() {
 		// Add the new bird sighting to the currentBirdSightings array
 		currentBirdSightings.push(birdSighting);
 	});
+
+	return currentBirdSightings;
 }
 
 function prepareMessage(birdSighting) {
@@ -47,7 +49,8 @@ function prepareMessage(birdSighting) {
 function sendTelegramMessage(text) {
 	const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
 	const chatId = process.env.TELEGRAM_CHAT_ID;
-	bot.sendMessage(chatId, text);
+	console.log(text);
+	// bot.sendMessage(chatId, text);
 }
 
 function sendBirdSightingToTelegram(birdSighting) {
@@ -57,15 +60,23 @@ function sendBirdSightingToTelegram(birdSighting) {
 
 async function checkForNewEntries() {
 	console.log('Checking for new bird sightings...');
-	await scrapeWebsite();
+	const currentBirdSightings = await scrapeWebsite();
 
-	// Filter out the new bird sightings based on uuid.
-	const newBirdSightings = currentBirdSightings.filter((birdSighting) => !previousBirdSightings.some((previousBirdSighting) => previousBirdSighting.id === birdSighting.id));
+	// Filter out the new bird sightings.
+	const newBirdSightings = currentBirdSightings.filter((currentBirdSighting) => {
+		return !previousBirdSightings.some((previousBirdSighting) => {
+			return previousBirdSighting.url === currentBirdSighting.url;
+		});
+	});
+
+	console.log(`Found ${currentBirdSightings.length} bird sightings.`);
+	console.log(`We had ${previousBirdSightings.length} bird sightings.`);
+	console.log(`Found ${newBirdSightings.length} new bird sightings.`);
 
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		currentBirdSightings = [];
+		sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀.\n\nCached initial ${previousBirdSightings.length} sightings.`);
 		return;
 	}
 
@@ -74,13 +85,11 @@ async function checkForNewEntries() {
 		console.log("New birds have been found. Sending messages...");
 		newBirdSightings.forEach((birdSighting) => {
 			sendBirdSightingToTelegram(birdSighting);
-			console.log(prepareMessage(birdSighting));
 		});
 	}
 
 	// Update the previousBirdSightings array
 	previousBirdSightings = currentBirdSightings;
-	currentBirdSightings = [];
 }
 
 
@@ -88,10 +97,9 @@ async function checkForNewEntries() {
 
 
 checkForNewEntries();
-// sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀`);
 
 // Create cron job for checking birds every 10 minutes.
-cron.schedule('*/10 * * * *', () => {
+cron.schedule('* * * * *', () => {
 	checkForNewEntries();
 });
 

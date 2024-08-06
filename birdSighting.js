@@ -1,6 +1,6 @@
 'use strict';
 
-// class that saves bird sighting containg, datetime, species, rarity, number, location, url
+// class that saves bird sighting containing, datetime, species, rarity, number, location, url
 module.exports = class BirdSighting {
     constructor(datetime, species, rarity, number, location, url) {
         this.datetime = datetime;
