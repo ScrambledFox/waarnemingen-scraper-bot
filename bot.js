@@ -11,6 +11,9 @@ const cron = require('node-cron');
 
 var BirdSighting = require('./birdSighting.js');
 
+
+const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, { polling: true });
+
 let previousBirdSightings = [];
 
 async function scrapeWebsite() {
@@ -47,10 +50,16 @@ function prepareMessage(birdSighting) {
 }
 
 function sendTelegramMessage(text) {
-	const bot = new TelegramBot(process.env.TELEGRAM_TOKEN);
 	const chatId = process.env.TELEGRAM_CHAT_ID;
 	console.log(text);
 	bot.sendMessage(chatId, text);
+}
+
+function onReceiveMessage(message) {
+	console.log('Received message:', message.text);
+	if (message.text === '/status') {
+		sendTelegramMessage('BirdWatcher is watching 👀');
+	}
 }
 
 function sendBirdSightingToTelegram(birdSighting) {
@@ -76,7 +85,7 @@ async function checkForNewEntries() {
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀.\n\nCached initial ${previousBirdSightings.length} sightings.`);
+		sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀.\n\nCached initial ${previousBirdSightings.length} sightings.\n\nLatest Sighting recorded: ${prepareMessage(previousBirdSightings[0])}`);
 		return;
 	}
 
@@ -92,14 +101,16 @@ async function checkForNewEntries() {
 	previousBirdSightings = currentBirdSightings;
 }
 
-
+///////////////////////
 // BIRD WATCHER
+///////////////////////
 
+bot.on('channel_post', (msg) => onReceiveMessage(msg));
 
 checkForNewEntries();
 
 // Create cron job for checking birds every 10 minutes.
-cron.schedule('* * * * *', () => {
+cron.schedule('*/10 * * * *', () => {
 	checkForNewEntries();
 });
 
@@ -115,9 +126,5 @@ app.get('/', (req, res) => {
 });
 
 app.get('/birds', (req, res) => {
-	res.send(previousBirdSightings);
-});
-
-app.get('/previous', (req, res) => {
 	res.send(previousBirdSightings);
 });
