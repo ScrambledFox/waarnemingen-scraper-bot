@@ -51,12 +51,12 @@ function prepareMessage(birdSighting) {
 
 function sendTelegramMessage(text) {
 	const chatId = process.env.TELEGRAM_CHAT_ID;
-	console.log(text);
+	// console.log(text);
 	bot.sendMessage(chatId, text);
 }
 
 function onReceiveMessage(message) {
-	console.log('Received message:', message.text);
+	// console.log('Received message:', message.text);
 	if (message.text === '/status') {
 		sendTelegramMessage('BirdWatcher is watching 👀');
 	}
@@ -68,7 +68,7 @@ function sendBirdSightingToTelegram(birdSighting) {
 }
 
 async function checkForNewEntries() {
-	console.log('Checking for new bird sightings...');
+	// console.log('Checking for new bird sightings...');
 	const currentBirdSightings = await scrapeWebsite();
 
 	// Filter out the new bird sightings.
@@ -78,20 +78,20 @@ async function checkForNewEntries() {
 		});
 	});
 
-	console.log(`Found ${currentBirdSightings.length} bird sightings.`);
-	console.log(`We had ${previousBirdSightings.length} bird sightings.`);
-	console.log(`Found ${newBirdSightings.length} new bird sightings.`);
+	// console.log(`Found ${currentBirdSightings.length} bird sightings.`);
+	// console.log(`We had ${previousBirdSightings.length} bird sightings.`);
+	// console.log(`Found ${newBirdSightings.length} new bird sightings.`);
 
 	// If the bot has just started, ignore the first run and only send the last bird sighting as a test
 	if (previousBirdSightings.length === 0) {
 		previousBirdSightings = currentBirdSightings;
-		sendTelegramMessage(`BirdWatcher version ${package.version} is online and watching 👀.\n\nCached initial ${previousBirdSightings.length} sightings.\n\nLatest Sighting recorded: ${prepareMessage(previousBirdSightings[0])}`);
+		console.log(`BirdWatcher version ${package.version} is online and watching 👀.\n\nCached initial ${previousBirdSightings.length} sightings.\n\nLatest Sighting recorded: ${prepareMessage(previousBirdSightings[0])}`);
 		return;
 	}
 
 	// If there are new bird sightings, send a message
 	if (newBirdSightings.length > 0) {
-		console.log("New birds have been found. Sending messages...");
+		// console.log("New birds have been found. Sending messages...");
 		newBirdSightings.forEach((birdSighting) => {
 			sendBirdSightingToTelegram(birdSighting);
 		});
